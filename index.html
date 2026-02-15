@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang ="en">
+    <head>
+        <meta charset ="UTF-8">
+        <meta name="viewport" content = "width = device-width,intial-scale=1.0">
+        <title>SeOtes</title>
+        <link rel="stylesheet" href ="style.css">
+    </head>
+    <body>
+        <div class="app">
+            <div class = "header">
+            <img src ="Resources/SeOtes.png" alt="SeOtes Logo">
+            <h1>SeOtes</h1>
+            </div>
+            <!--Note input -->
+            <div class="note-input">
+                <input type ="text" id ="note-title" placeholder ="Title">
+                <textarea id="note-text"placeholder="Write your note..."></textarea>
+                <button onClick="addNote()">Add Note</button>
+            </div>
+            <!--Notes display -->
+            <div id ="notes-container" calss="notes-container"></div>
+        </div>
+        </div>
+        
+        <script src ="app.js"></script>
+    </body>
+</html>

@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SeOtes</title>
+  <style>
+    /* Reset + Fullscreen */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body, html {
+      height: 100%;
+      width: 100%;
+      font-family: Arial, sans-serif;
+      background: #181515;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .app {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      background: rgb(244, 205, 235);
+    }
+
+    .header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #6700a2;
+  color: white;
+  padding: 15px;
+  position: sticky; /* stays visible when scrolling */
+  top: 0;
+  z-index: 1000;
+}
+
+.header-left,
+.header-right {
+  flex: 1; /* take equal flexible space */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.header-center {
+  flex: 2; /* bigger share for center */
+  display: flex;
+  justify-content: center; /* center contents */
+  align-items: center;
+  gap: 10px;
+}
+
+    .header-center img {
+     height: 80px;   /* Placeholder logo */
+     width: 80px;
+     border-radius: 50%;
+     background: rgb(247, 136, 204);
+     padding: 4px;
+    }
+
+    .header-center h1 {
+     margin: 1;
+     font-size: 44px;
+    }
+
+    /* Note Form */
+    .note-form {
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      background: #f3f0fa;
+    }
+
+    .note-form input, .note-form textarea {
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      font-size: 14px;
+      width: 100%;
+    }
+
+    .note-form button {
+      background: #FF4081;
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    /* Notes grid */
+    .notes-container {
+      flex: 1; /* Take full remaining space */
+      padding: 15px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 15px;
+      overflow-y: auto;
+    }
+
+    .note {
+      background: #FFF0F6;
+      border: 1px solid #FFC0CB;
+      border-radius: 10px;
+      padding: 15px;
+      font-size: 14px;
+      position: relative;
+      word-wrap: break-word;
+    }
+
+    .note strong {
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .note button {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      border: none;
+      background: transparent;
+      color: red;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .footer {
+    text-align: center;
+    padding: 15px;
+    background: #6700a2;
+    color: #fff;
+    font-size: 14px;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+  }
+
+    /* Mobile responsiveness */
+    @media (max-width: 768px) {
+      .note-form {
+        padding: 10px;
+      }
+      .notes-container {
+        grid-template-columns: 1fr; /* 1 column on mobile */
+      }
+      .header h1 {
+        font-size: 18px;
+      }
+      .note-form input, .note-form textarea {
+        font-size: 13px;
+      }
+      .note-form button {
+        font-size: 13px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- Header -->
+  <div class="header">
+    <div class="header-left">
+      <!-- Example button -->
+      <!-- <button>☰</button> -->
+    </div>
+
+    <div class="header-center">
+      <img src="Resources/SeOtes.png" alt="SeOgGy Logo">
+      <h1>SeOtes</h1>
+    </div>
+
+    <div class="header-right">
+      <!-- Example button -->
+      <!-- <button>⚙</button> -->
+    </div>
+   </div>
+
+    <!-- Note Form -->
+    <div class="note-form">
+      <input type="text" id="noteTitle" placeholder="Title">
+      <textarea id="noteContent" rows="3" placeholder="Write your note..."></textarea>
+      <button onclick="addNote()">Add Note</button>
+    </div>
+
+    <!-- Notes Container -->
+    <div class="notes-container" id="notesContainer"></div>
+  </div>
+
+  <script>
+  let editIndex = -1; // keep track of note being edited
+
+function addNote() {
+  const title = document.getElementById("noteTitle").value;
+  const content = document.getElementById("noteContent").value;
+
+  // Check if empty
+  if (title.trim() === "" && content.trim() === "") {
+    alert("Write something before adding!");
+    return;
+  }
+
+  const notes = JSON.parse(localStorage.getItem("seotesNotes")) || [];
+
+  if (editIndex === -1) {
+    // Add new note
+    notes.push({ title, content });
+  } else {
+    // Update existing note
+    notes[editIndex] = { title, content };
+    editIndex = -1;
+    document.querySelector(".note-form button").innerText = "Add Note";
+  }
+
+  localStorage.setItem("seotesNotes", JSON.stringify(notes));
+  renderNotes();
+
+  // Clear form
+  document.getElementById("noteTitle").value = "";
+  document.getElementById("noteContent").value = "";
+}
+
+function editNote(index) {
+  const notes = JSON.parse(localStorage.getItem("seotesNotes")) || [];
+  const note = notes[index];
+
+  document.getElementById("noteTitle").value = note.title;
+  document.getElementById("noteContent").value = note.content;
+
+  editIndex = index; // mark note for editing
+  document.querySelector(".note-form button").innerText = "Update Note";
+}
+
+function deleteNote(index) {
+  const notes = JSON.parse(localStorage.getItem("seotesNotes")) || [];
+  notes.splice(index, 1);
+  localStorage.setItem("seotesNotes", JSON.stringify(notes));
+  renderNotes();
+}
+
+function renderNotes() {
+  const notes = JSON.parse(localStorage.getItem("seotesNotes")) || [];
+  const container = document.getElementById("notesContainer");
+  container.innerHTML = "";
+  notes.forEach((note, index) => {
+    const noteDiv = document.createElement("div");
+    noteDiv.className = "note";
+    noteDiv.innerHTML = `
+      <button onclick="deleteNote(${index})">×</button>
+      <strong>${note.title}</strong>
+      ${note.content}
+      <br>
+      <button onclick="editNote(${index})" style="margin-top:8px; font-size:12px; color:blue; border:none; background:none; cursor:pointer;">✏ Edit</button>
+    `;
+    container.appendChild(noteDiv);
+  });
+}
+// Save draft while typing
+document.getElementById("noteTitle").addEventListener("input", saveDraft);
+document.getElementById("noteContent").addEventListener("input", saveDraft);
+
+function saveDraft() {
+  const draft = {
+    title: document.getElementById("noteTitle").value,
+    content: document.getElementById("noteContent").value
+  };
+  localStorage.setItem("seotesDraft", JSON.stringify(draft));
+}
+
+// Restore draft on page load
+function loadDraft() {
+  const draft = JSON.parse(localStorage.getItem("seotesDraft")) || {};
+  if (draft.title) document.getElementById("noteTitle").value = draft.title;
+  if (draft.content) document.getElementById("noteContent").value = draft.content;
+}
+
+
+ // 🔥 This makes notes re-appear after reload
+window.onload = function() {
+  renderNotes();
+ 
+};
+</script>
+<footer class="footer">
+    © SeOgGy 2025 — All Rights Reserved
+  </footer>
+</body>
+</html>
